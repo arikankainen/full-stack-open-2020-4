@@ -27,9 +27,23 @@ const mostBlogs = (blogs => {
   return tempBlogs.reduce((max, blog) => max.blogs > blog.blogs ? max : blog)
 })
 
+const mostLikes = (blogs => {
+  let tempBlogs = []
+
+  blogs.map(blog => {
+    const index = tempBlogs.findIndex(tempBlog => tempBlog.author === blog.author)
+
+    if (index === -1) tempBlogs.push({ author: blog.author, likes: blog.likes })
+    else tempBlogs[index].likes += blog.likes
+  })
+
+  return tempBlogs.reduce((max, blog) => max.likes > blog.likes ? max : blog)
+})
+
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
-  mostBlogs
+  mostBlogs,
+  mostLikes
 }
