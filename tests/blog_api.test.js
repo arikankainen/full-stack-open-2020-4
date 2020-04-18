@@ -119,6 +119,37 @@ test('delete first blog with response 204 and confirm that it was deleted', asyn
   expect(ids).not.toContain(id)
 })
 
+test('update first blog', async () => {
+  const blogs = await helper.blogsInDb()
+  const id = blogs[0].id
+
+  const blogObject = {
+    title: 'testTitle',
+    author: 'testAuthor',
+    url: 'testUrl',
+    likes: 999
+  }
+
+  await api
+    .put(`/api/blogs/${id}`)
+    .send(blogObject)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+
+  const title = blogsAtEnd.map(n => n.title)
+  expect(title).toContain('testTitle')
+
+  const author = blogsAtEnd.map(n => n.author)
+  expect(author).toContain('testAuthor')
+
+  const url = blogsAtEnd.map(n => n.url)
+  expect(url).toContain('testUrl')
+
+  const likes = blogsAtEnd.map(n => n.likes)
+  expect(likes).toContain(999)
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
