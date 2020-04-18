@@ -18,17 +18,48 @@ test('blogs are returned as json', async () => {
 })
 
 test('all blogs are returned', async () => {
-  const response = await api.get('/api/blogs')
+  const blogs = await helper.blogsInDb()
 
-  expect(response.body).toHaveLength(helper.initialBlogs.length)
+  expect(blogs).toHaveLength(helper.initialBlogs.length)
 })
 
 test('blogs have field id instead of _id', async () => {
-  const response = await api.get('/api/blogs')
+  const blogs = await helper.blogsInDb()
 
-  expect(response.body[0].id).toBeDefined()
-  expect(response.body[0]._id).not.toBeDefined()
+  expect(blogs[0].id).toBeDefined()
+  expect(blogs[0]._id).not.toBeDefined()
 })
+
+test('a valid blog can be added', async () => {
+  const newBlog = {
+    title: 'testTitle',
+    author: 'testAuthor',
+    url: 'testUrl',
+    likes: 999
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+
+  const title = blogsAtEnd.map(n => n.title)
+  expect(title).toContain('testTitle')
+
+  const author = blogsAtEnd.map(n => n.author)
+  expect(author).toContain('testAuthor')
+
+  const url = blogsAtEnd.map(n => n.url)
+  expect(url).toContain('testUrl')
+
+  const likes = blogsAtEnd.map(n => n.likes)
+  expect(likes).toContain(999)
+})
+
 
 afterAll(() => {
   mongoose.connection.close()
