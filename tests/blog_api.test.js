@@ -23,7 +23,7 @@ test('all blogs are returned', async () => {
   expect(blogs).toHaveLength(helper.initialBlogs.length)
 })
 
-test('blogs have field id instead of _id', async () => {
+test('blogs have field "id" instead of "_id"', async () => {
   const blogs = await helper.blogsInDb()
 
   expect(blogs[0].id).toBeDefined()
@@ -60,6 +60,25 @@ test('a valid blog can be added', async () => {
   expect(likes).toContain(999)
 })
 
+test('if field "likes" is not set, initial value will be 0', async () => {
+  const newBlog = {
+    title: 'testTitle',
+    author: 'testAuthor',
+    url: 'testUrl'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+
+  const likes = blogsAtEnd.map(n => n.likes)
+  expect(likes).toContain(0)
+})
 
 afterAll(() => {
   mongoose.connection.close()
