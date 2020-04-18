@@ -80,6 +80,32 @@ test('if field "likes" is not set, initial value will be 0', async () => {
   expect(likes).toContain(0)
 })
 
+test('if field "title" is not set, response status code 400 Bad request', async () => {
+  const newBlog = {
+    author: 'testAuthor',
+    url: 'testUrl'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+})
+
+test('if field "url" is not set, response status code 400 Bad request', async () => {
+  const newBlog = {
+    title: 'testTitle',
+    author: 'testAuthor'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
