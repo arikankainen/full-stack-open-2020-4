@@ -106,6 +106,19 @@ test('if field "url" is not set, response status code 400 Bad request', async ()
     .expect('Content-Type', /application\/json/)
 })
 
+test('delete first blog with response 204 and confirm that it was deleted', async () => {
+  const blogs = await helper.blogsInDb()
+  const id = blogs[0].id
+
+  await api
+    .delete(`/api/blogs/${id}`)
+    .expect(204)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  const ids = blogsAtEnd.map(n => n.id)
+  expect(ids).not.toContain(id)
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
