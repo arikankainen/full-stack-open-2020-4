@@ -30,7 +30,7 @@ test('blogs have field "id" instead of "_id"', async () => {
   expect(blogs[0]._id).not.toBeDefined()
 })
 
-test('a valid blog can be added', async () => {
+test('a valid blog with valid token can be added', async () => {
   const newBlog = {
     title: 'testTitle',
     author: 'testAuthor',
@@ -38,8 +38,11 @@ test('a valid blog can be added', async () => {
     likes: 999
   }
 
+  const token = await helper.loginToken()
+
   await api
     .post('/api/blogs')
+    .set('Authorization', 'Bearer ' + token)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -67,8 +70,11 @@ test('if field "likes" is not set, initial value will be 0', async () => {
     url: 'testUrl'
   }
 
+  const token = await helper.loginToken()
+
   await api
     .post('/api/blogs')
+    .set('Authorization', 'Bearer ' + token)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -86,8 +92,11 @@ test('if field "title" is not set, response status code 400 Bad request', async 
     url: 'testUrl'
   }
 
+  const token = await helper.loginToken()
+
   await api
     .post('/api/blogs')
+    .set('Authorization', 'Bearer ' + token)
     .send(newBlog)
     .expect(400)
     .expect('Content-Type', /application\/json/)
@@ -99,8 +108,11 @@ test('if field "url" is not set, response status code 400 Bad request', async ()
     author: 'testAuthor'
   }
 
+  const token = await helper.loginToken()
+
   await api
     .post('/api/blogs')
+    .set('Authorization', 'Bearer ' + token)
     .send(newBlog)
     .expect(400)
     .expect('Content-Type', /application\/json/)
@@ -110,8 +122,11 @@ test('delete first blog with response 204 and confirm that it was deleted', asyn
   const blogs = await helper.blogsInDb()
   const id = blogs[0].id
 
+  const token = await helper.loginToken()
+
   await api
     .delete(`/api/blogs/${id}`)
+    .set('Authorization', 'Bearer ' + token)
     .expect(204)
 
   const blogsAtEnd = await helper.blogsInDb()
@@ -148,6 +163,23 @@ test('update first blog', async () => {
 
   const likes = blogsAtEnd.map(n => n.likes)
   expect(likes).toContain(999)
+})
+
+test('adding new blog without token fails with 401 Unauthorized', async () => {
+  const blogObject = {
+    title: 'testTitle',
+    author: 'testAuthor',
+    url: 'testUrl',
+    likes: 999
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(blogObject)
+    .expect(401)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
 afterAll(() => {
